@@ -10,7 +10,7 @@ double randomInRange(double low, double high) {
 	return low + unitRand*(high - low);
 }
 
-// Despite the mess, this is a simple delay class which rounds to the nearest sample.
+// This is a simple delay class which rounds to a whole number of samples.
 using Delay = signalsmith::delay::Delay<double, signalsmith::delay::InterpolatorNearest>;
 
 struct SingleChannelFeedback {
@@ -50,8 +50,10 @@ struct MultiChannelFeedback {
 	void configure(double sampleRate) {
 		double delaySamplesBase = delayMs*0.001*sampleRate;
 		for (int c = 0; c < channels; ++c) {
+			// Distribute delay times exponentially between delayMs and 2*delayMs
 			double r = c*1.0/channels;
 			delaySamples[c] = std::pow(2, r)*delaySamplesBase;
+			
 			delays[c].resize(delaySamples[c] + 1);
 			delays[c].reset();
 		}
